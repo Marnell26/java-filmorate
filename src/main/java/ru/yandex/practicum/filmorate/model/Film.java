@@ -1,19 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @Slf4j
 public class Film {
-    int id;
-    String name;
-    String description;
-    LocalDate releaseDate;
-    Duration duration;
+    private int id;
+
+    @NotBlank
+    private String name;
+
+    @Size(min = 1, max = 200, message = "Описание не должно пустым и превышать 200 символов")
+    private String description;
+
+    @NotNull(message = "Дата релиза обязательна")
+    private LocalDate releaseDate;
+
+    @Positive(message = "Продолжительность должна быть положительной")
+    private int duration;
 
 }
