@@ -15,20 +15,24 @@ import java.util.Map;
 @RequestMapping("/users")
 @Slf4j
 public class UserController {
+
     private final Map<Integer, User> users = new HashMap<>();
     private Integer id = 1;
 
     @PostMapping
     public User createUser(@RequestBody @Valid User user) {
-        user.setId(generateId());
-
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+        try {
+            user.setId(generateId());
+            if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
+            }
+            users.put(user.getId(), user);
+            log.info("Пользователь {} добавлен", user.getLogin());
+            return user;
+        } catch (ValidationException e) {
+            log.debug(e.getMessage());
+            throw e;
         }
-
-        users.put(user.getId(), user);
-        log.info("Пользователь {} добавлен", user.getLogin());
-        return user;
     }
 
     @PutMapping
