@@ -2,8 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ReleaseDateValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validation.ReleaseDateValidator;
 
@@ -28,7 +32,7 @@ public class FilmController {
             films.put(film.getId(), film);
             log.info("Фильм {} добавлен", film.getName());
             return film;
-        } catch (ValidationException e) {
+        } catch (ReleaseDateValidationException e) {
             log.debug(e.getMessage());
             throw e;
         }
@@ -40,19 +44,47 @@ public class FilmController {
         if (!films.containsKey(film.getId())) {
             String message = "Фильм не найден";
             log.error(message);
-            throw new ValidationException(message);
+            throw new NotFoundException(message);
         }
-        films.put(film.getId(), film);
-        log.info("Информация о фильме {} обновлена", film.getName());
-        return film;
+        try {
+            ReleaseDateValidator.validateFilm(film);
+            films.put(film.getId(), film);
+            log.info("Информация о фильме {} обновлена", film.getName());
+            return film;
+        } catch (ReleaseDateValidationException e) {
+            log.debug(e.getMessage());
+            throw e;
+        }
     }
 
     @GetMapping
     public List<Film> getFilms() {
-        return new ArrayList<Film>(films.values());
+        return new ArrayList<>(films.values());
     }
 
-    public Integer generateId() {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException e) {
+        Map<String, String> errors = new HashMap<>();
+        e.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ReleaseDateValidationException.class)
+    public List<String> dateValidationException(ReleaseDateValidationException e) {
+        List<String> errors = new ArrayList<>();
+        String date = "Введенная дата релиза " + e.getReleaseDate();
+        errors.add(date);
+        errors.add(e.getMessage());
+        return errors;
+    }
+
+    private Integer generateId() {
         return id++;
     }
 
