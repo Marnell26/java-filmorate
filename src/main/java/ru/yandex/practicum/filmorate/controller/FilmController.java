@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.exception.ReleaseDateValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.validation.ReleaseDateValidator;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,16 +72,29 @@ public class FilmController {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        errors.put("timestamp", LocalDateTime.now().toString());
+        errors.put("status", e.getStatusCode().toString());
         return errors;
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ReleaseDateValidationException.class)
-    public List<String> dateValidationException(ReleaseDateValidationException e) {
-        List<String> errors = new ArrayList<>();
-        String date = "Введенная дата релиза " + e.getReleaseDate();
-        errors.add(date);
-        errors.add(e.getMessage());
+    public Map<String, String> dateValidationException(ReleaseDateValidationException e) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("timestamp", LocalDateTime.now().toString());
+        errors.put("status", "400");
+        errors.put("Введенная дата релиза", String.valueOf(e.getReleaseDate()));
+        errors.put("error", e.getMessage());
+        return errors;
+    }
+
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(NotFoundException.class)
+    public Map<String, String> handleNotFoundExceptions(NotFoundException e) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("timestamp", LocalDateTime.now().toString());
+        errors.put("status", "404");
+        errors.put("error", e.getMessage());
         return errors;
     }
 

@@ -1,61 +1,62 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@WebMvcTest(UserController.class)
-class UserControllerTest {
+@AutoConfigureMockMvc
+class UserControllerTest extends ControllersTest {
 
-    private UserController userController;
-    private User user;
+    @ParameterizedTest
+    @DisplayName("Тесты валидации с неправильными данными")
+    @ValueSource(strings = {"SpaceInLogin", "WrongEmail", "WrongBirthday", "EmptyEmail", "EmptyLogin"})
+    public void createUserWithSpaceInLogin(String testCase) throws Exception {
+        String parameter;
+        String text;
+        switch (testCase) {
+            case "SpaceInLogin" -> {
+                parameter = "login";
+                text = "Логин не должен содержать пробелы";
+                user2.setLogin("user 2");
+            }
+            case "WrongEmail" -> {
+                parameter = "email";
+                text = "Некорректный формат email";
+                user2.setEmail("mail.ru");
+            }
+            case "WrongBirthday" -> {
+                parameter = "birthday";
+                text = "Некорректная дата рождения";
+                user2.setBirthday(LocalDate.of(2446, 8, 20));
+            }
+            case "EmptyEmail" -> {
+                parameter = "email";
+                text = "Email не должен быть пустым";
+                user2.setEmail(null);
+            }
+            case "EmptyLogin" -> {
+                parameter = "login";
+                text = "Логин не должен быть пустым";
+                user2.setLogin(null);
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + testCase);
+        }
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @BeforeEach
-    public void beforeEach() {
-        userController = new UserController();
-        user = User.builder()
-                .login("user1")
-                .email("user1@mail.ru")
-                .name("Ivan Ivanov")
-                .birthday(LocalDate.of(1990, 12, 12))
-                .build();
-    }
-
-    @Test
-    public void createUserTest() {
-        userController.createUser(user);
-        assertEquals(1, userController.getUsers().getFirst().getId());
-    }
-
-    @Test
-    public void updateUserTest() {
-        userController.createUser(user);
-        User updatedUser = user;
-        updatedUser.setEmail("user1@yandex.ru");
-        userController.updateUser(updatedUser);
-        assertEquals(updatedUser, userController.getUsers().getFirst());
-    }
-
-    @Test
-    public void createUserWithSpaceInLogin() {
-        User user2 = user;
-        user2.setLogin("user 2");
-        userController.createUser(user2);
-
+        mockMvc.perform(post("/users")
+                        .content(objectMapper.writeValueAsBytes(user2))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$." + parameter).value(text));
     }
 
 }
