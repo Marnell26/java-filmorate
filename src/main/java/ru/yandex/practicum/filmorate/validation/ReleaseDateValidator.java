@@ -10,6 +10,6 @@ public class ReleaseDateValidator {
     public static void validateFilm(Film newFilm) throws ReleaseDateValidationException {
         if (newFilm.getReleaseDate().isBefore(LocalDate.of(1895, Month.DECEMBER, 28)))
             throw new ReleaseDateValidationException(newFilm.getReleaseDate(), "Дата релиза должна быть не раньше " +
-                    "28.12.1895;");
+                    "28.12.1895");
     }
 }

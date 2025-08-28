@@ -16,8 +16,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.time.LocalDate;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -42,15 +41,24 @@ public class ControllersTest {
                 .releaseDate(LocalDate.of(2011, 1, 10))
                 .duration(120)
                 .build();
-
+        film2 = Film.builder()
+                .name("Фильм")
+                .description("Описание фильма")
+                .releaseDate(LocalDate.of(2011, 1, 10))
+                .duration(120)
+                .build();
         user = User.builder()
-                .login("user1")
-                .email("user1@mail.ru")
+                .login("user")
+                .email("user@mail.ru")
                 .name("Ivan Ivanov")
                 .birthday(LocalDate.of(1990, 12, 12))
                 .build();
-        user2 = user;
-        film2 = film;
+        user2 = User.builder()
+                .login("user")
+                .email("user@mail.ru")
+                .name("Ivan Ivanov")
+                .birthday(LocalDate.of(1990, 12, 12))
+                .build();
     }
 
     @ParameterizedTest
@@ -77,11 +85,8 @@ public class ControllersTest {
         mockMvc.perform(post(path)
                         .content(object)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
-
-        mockMvc.perform(get(path))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.." + parameter).value(expectedValue));
+                .andExpect(jsonPath("$." + parameter).value(expectedValue));
     }
 
     @ParameterizedTest
@@ -147,6 +152,16 @@ public class ControllersTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value(errorText));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Получение списка объектов")
+    @ValueSource(strings = {"/users", "/films"})
+    public void getRequest(String path) throws Exception {
+
+        mockMvc.perform(get(path))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
 }

@@ -20,7 +20,7 @@ class UserControllerTest extends ControllersTest {
     @ParameterizedTest
     @DisplayName("Тесты валидации с неправильными данными")
     @ValueSource(strings = {"SpaceInLogin", "WrongEmail", "WrongBirthday", "EmptyEmail", "EmptyLogin"})
-    public void createUserWithSpaceInLogin(String testCase) throws Exception {
+    public void createUserWithWrongData(String testCase) throws Exception {
         String parameter;
         String text;
         switch (testCase) {
