@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.validation.OldReleaseDate;
 
 import java.time.LocalDate;
 
@@ -22,7 +23,7 @@ public class Film {
     @Size(min = 1, max = 200, message = "Описание не должно пустым и превышать 200 символов")
     private String description;
 
-    @NotNull(message = "Дата релиза обязательна")
+    @OldReleaseDate(message = "Дата релиза обязательна и должна быть не раньше 28.12.1895")
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность должна быть положительной")

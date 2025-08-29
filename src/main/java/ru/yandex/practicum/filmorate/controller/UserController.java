@@ -2,14 +2,10 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,30 +45,6 @@ public class UserController {
     @GetMapping
     public List<User> getUsers() {
         return new ArrayList<>(users.values());
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        errors.put("timestamp", LocalDateTime.now().toString());
-        errors.put("status", e.getStatusCode().toString());
-        return errors;
-    }
-
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(NotFoundException.class)
-    public Map<String, String> handleNotFoundExceptions(NotFoundException e) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put("timestamp", LocalDateTime.now().toString());
-        errors.put("status", "404");
-        errors.put("error", e.getMessage());
-        return errors;
     }
 
     private Integer generateId() {

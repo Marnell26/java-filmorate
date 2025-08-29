@@ -151,7 +151,7 @@ public class ControllersTest {
                         .content(updatedObject)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value(errorText));
+                .andExpect(jsonPath("$.errorDescription").value(errorText));
     }
 
     @ParameterizedTest
