@@ -29,4 +29,15 @@ public class User {
     @PastOrPresent(message = "Некорректная дата рождения")
     private LocalDate birthday;
 
+
+    public User(int id, String email, String login, String name, LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        if (name == null || name.isBlank()) {
+            this.name = login;
+        }
+        this.birthday = birthday;
+    }
 }
