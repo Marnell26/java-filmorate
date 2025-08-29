@@ -22,7 +22,7 @@ class UserControllerTest extends ControllersTest {
     @ParameterizedTest
     @DisplayName("Тесты валидации с неправильными данными")
     @MethodSource("stringsForValidationTest")
-    public void createUserWithWrongData(String testCase, String parameter, String text) throws Exception {
+    public void createUserWithWrongData(String testCase, String text) throws Exception {
         switch (testCase) {
             case "SpaceInLogin" -> user2.setLogin("user 2");
             case "WrongEmail" -> user2.setEmail("mail.ru");
@@ -35,16 +35,16 @@ class UserControllerTest extends ControllersTest {
                         .content(objectMapper.writeValueAsBytes(user2))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors." + parameter).value(text));
+                .andExpect(jsonPath("$.errors[0].message").value(text));
     }
 
     private static Stream<Arguments> stringsForValidationTest() {
         return Stream.of(
-                Arguments.of("SpaceInLogin", "login", "Логин не должен содержать пробелы"),
-                Arguments.of("WrongEmail", "email", "Некорректный формат email"),
-                Arguments.of("WrongBirthday", "birthday", "Некорректная дата рождения"),
-                Arguments.of("EmptyEmail", "email", "Email не должен быть пустым"),
-                Arguments.of("EmptyLogin", "login", "Логин не должен быть пустым")
+                Arguments.of("SpaceInLogin", "Логин не должен содержать пробелы"),
+                Arguments.of("WrongEmail", "Некорректный формат email"),
+                Arguments.of("WrongBirthday", "Некорректная дата рождения"),
+                Arguments.of("EmptyEmail", "Email не должен быть пустым"),
+                Arguments.of("EmptyLogin", "Логин не должен быть пустым")
         );
     }
 

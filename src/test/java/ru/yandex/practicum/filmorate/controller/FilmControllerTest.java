@@ -24,7 +24,7 @@ public class FilmControllerTest extends ControllersTest {
     @ParameterizedTest
     @DisplayName("Тесты валидации с неправильными данными")
     @MethodSource("stringsForValidationTest")
-    public void createFilmWithWrongData(String testCase, String parameter, String text) throws Exception {
+    public void createFilmWithWrongData(String testCase, String text) throws Exception {
         switch (testCase) {
             case "EmptyName" -> film2.setName(null);
             case "EmptyDescription" -> film2.setDescription("");
@@ -46,19 +46,17 @@ public class FilmControllerTest extends ControllersTest {
                         .content(objectMapper.writeValueAsBytes(film2))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errors." + parameter).value(text));
+                .andExpect(jsonPath("$.errors[0].message").value(text));
     }
 
     private static Stream<Arguments> stringsForValidationTest() {
         return Stream.of(
-                Arguments.of("EmptyName", "name", "Имя не должно быть пустым"),
-                Arguments.of("EmptyDescription", "description", "Описание не должно пустым и превышать 200 символов"),
-                Arguments.of("MaxSymbols", "description", "Описание не должно пустым и превышать 200 символов"),
-                Arguments.of("EmptyReleaseDate", "releaseDate", "Дата релиза обязательна " +
-                        "и должна быть не раньше 28.12.1895"),
-                Arguments.of("NegativeDuration", "duration", "Продолжительность должна быть положительной"),
-                Arguments.of("OldReleaseDate", "releaseDate", "Дата релиза обязательна " +
-                        "и должна быть не раньше 28.12.1895")
+                Arguments.of("EmptyName", "Имя не должно быть пустым"),
+                Arguments.of("EmptyDescription", "Описание не должно пустым и превышать 200 символов"),
+                Arguments.of("MaxSymbols", "Описание не должно пустым и превышать 200 символов"),
+                Arguments.of("EmptyReleaseDate", "Дата релиза обязательна и должна быть не раньше 28.12.1895"),
+                Arguments.of("NegativeDuration", "Продолжительность должна быть положительной"),
+                Arguments.of("OldReleaseDate", "Дата релиза обязательна и должна быть не раньше 28.12.1895")
         );
     }
 }
