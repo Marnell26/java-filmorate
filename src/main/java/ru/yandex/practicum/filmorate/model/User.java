@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -29,6 +31,7 @@ public class User {
     @PastOrPresent(message = "Некорректная дата рождения")
     private LocalDate birthday;
 
+    private final Set<Integer> friendsIds;
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
@@ -39,5 +42,14 @@ public class User {
             this.name = login;
         }
         this.birthday = birthday;
+        friendsIds = new HashSet<>();
+    }
+
+    public void setFriendId(int id) {
+        friendsIds.add(id);
+    }
+
+    public void removeFriendId(int id) {
+        friendsIds.remove(id);
     }
 }

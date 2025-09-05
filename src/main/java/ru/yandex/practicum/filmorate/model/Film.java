@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.yandex.practicum.filmorate.validation.OldReleaseDate;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -28,4 +29,13 @@ public class Film {
     @Positive(message = "Продолжительность должна быть положительной")
     private int duration;
 
+    private Set<Integer> likeByUserId;
+
+    public void setLikeByUserId(int id) {
+        likeByUserId.add(id);
+    }
+
+    public void removeLikeByUserId(int id) {
+        likeByUserId.remove(id);
+    }
 }
