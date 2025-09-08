@@ -31,7 +31,7 @@ public class User {
     @PastOrPresent(message = "Некорректная дата рождения")
     private LocalDate birthday;
 
-    private final Set<Integer> friendsIds;
+    private final Set<Integer> friendsIds = new HashSet<>();
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
@@ -42,7 +42,6 @@ public class User {
             this.name = login;
         }
         this.birthday = birthday;
-        friendsIds = new HashSet<>();
     }
 
     public void setFriendId(int id) {

@@ -1,17 +1,19 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,6 +48,75 @@ class UserControllerTest extends ControllersTest {
                 Arguments.of("EmptyEmail", "Email не должен быть пустым"),
                 Arguments.of("EmptyLogin", "Логин не должен быть пустым")
         );
+    }
+
+    private void addFriends() throws Exception {
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(user)));
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(user2)));
+
+        mockMvc.perform(put("/users/1/friends/2"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Тест добавления в друзья")
+    public void addFriendsTest() throws Exception {
+        addFriends();
+
+        mockMvc.perform(get("/users/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.friendsIds[*]").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Тест удаления из друзей")
+    public void removeFriendsTest() throws Exception {
+        addFriends();
+
+        mockMvc.perform(delete("/users/1/friends/2"))
+                .andExpect(status().isOk());
+
+    }
+
+    @Test
+    @DisplayName("Тест получения списка друзей")
+    public void getFriendListTest() throws Exception {
+        addFriends();
+
+        mockMvc.perform(get("/users/1/friends"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].friendsIds[0]").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Тест получения списка общих друзей")
+    public void getCommonFriendListTest() throws Exception {
+        addFriends();
+
+        User user3 = User.builder()
+                .login("user3")
+                .email("user3@mail.ru")
+                .name("Ivan Ivanov")
+                .birthday(LocalDate.of(1990, 12, 12))
+                .build();
+
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsBytes(user3)));
+
+        mockMvc.perform(put("/users/3/friends/1"))
+                .andExpect(status().isOk());
+        mockMvc.perform(put("/users/3/friends/2"))
+                .andExpect(status().isOk());
+
+
+        mockMvc.perform(get("/users/1/friends/common/2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value("3"));
     }
 
 }

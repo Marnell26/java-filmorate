@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +62,11 @@ public class ControllersTest {
                 .build();
     }
 
+    @AfterEach
+    public void afterEach() {
+
+    }
+
     @ParameterizedTest
     @DisplayName("Создание объекта с правильными данными")
     @ValueSource(strings = {"/users", "/films"})
@@ -81,7 +87,6 @@ public class ControllersTest {
             }
             default -> throw new IllegalStateException("Unexpected value: " + path);
         }
-
         mockMvc.perform(post(path)
                         .content(object)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -162,6 +167,18 @@ public class ControllersTest {
         mockMvc.perform(get(path))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @ParameterizedTest
+    @DisplayName("Получение объекта по id")
+    @ValueSource(strings = {"/users", "/films"})
+    public void getOneObjectRequest(String path) throws Exception {
+
+        createTest(path);
+
+        mockMvc.perform(get(path + "/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$." + "id").value(1));
     }
 
 }
