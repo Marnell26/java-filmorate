@@ -6,12 +6,12 @@ import java.util.List;
 
 public interface UserStorage {
 
-    public User createUser(User user);
+    User createUser(User user);
 
-    public User updateUser(User user);
+    User updateUser(User user);
 
-    public List<User> getUsers();
+    List<User> getUsers();
 
-    public User getUser(int id);
+    User getUser(int id);
 
 }

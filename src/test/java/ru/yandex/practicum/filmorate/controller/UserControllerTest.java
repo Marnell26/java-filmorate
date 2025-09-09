@@ -97,12 +97,7 @@ class UserControllerTest extends ControllersTest {
     public void getCommonFriendListTest() throws Exception {
         addFriends();
 
-        User user3 = User.builder()
-                .login("user3")
-                .email("user3@mail.ru")
-                .name("Ivan Ivanov")
-                .birthday(LocalDate.of(1990, 12, 12))
-                .build();
+        User user3 = new User(0, "user3@mail.ru", "user3", "Ivan", LocalDate.of(1990, 12, 12));
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)

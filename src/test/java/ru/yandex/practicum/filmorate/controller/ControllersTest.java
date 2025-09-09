@@ -36,30 +36,10 @@ public class ControllersTest {
 
     @BeforeEach
     public void beforeEach() {
-        film = Film.builder()
-                .name("Фильм")
-                .description("Описание фильма")
-                .releaseDate(LocalDate.of(2011, 1, 10))
-                .duration(120)
-                .build();
-        film2 = Film.builder()
-                .name("Фильм")
-                .description("Описание фильма")
-                .releaseDate(LocalDate.of(2011, 1, 10))
-                .duration(120)
-                .build();
-        user = User.builder()
-                .login("user")
-                .email("user@mail.ru")
-                .name("Ivan Ivanov")
-                .birthday(LocalDate.of(1990, 12, 12))
-                .build();
-        user2 = User.builder()
-                .login("user")
-                .email("user@mail.ru")
-                .name("Ivan Ivanov")
-                .birthday(LocalDate.of(1990, 12, 12))
-                .build();
+        film = new Film(0, "Фильм", "Описание фильма", LocalDate.of(2011, 1, 10), 120);
+        film2 = new Film(0, "Фильм", "Описание фильма", LocalDate.of(2011, 1, 10), 120);
+        user = new User(0, "user@mail.ru", "user", "Ivan", LocalDate.of(1990, 12, 12));
+        user2 = new User(0, "user@mail.ru", "user", "Ivan", LocalDate.of(1990, 12, 12));
     }
 
     @AfterEach

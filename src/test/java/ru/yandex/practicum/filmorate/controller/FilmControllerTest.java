@@ -102,12 +102,7 @@ public class FilmControllerTest extends ControllersTest {
     public void getPopularFilmsTest() throws Exception {
         film2.setName("Фильм2");
         user2.setLogin("user2");
-        Film film3 = Film.builder()
-                .name("Фильм3")
-                .description("Описание фильма")
-                .releaseDate(LocalDate.of(2011, 1, 10))
-                .duration(120)
-                .build();
+        Film film3 = new Film(0, "Фильм3", "Описание фильма", LocalDate.of(2011, 1, 10), 120);
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,7 +125,6 @@ public class FilmControllerTest extends ControllersTest {
         mockMvc.perform(put("/films/1/like/2"));
         mockMvc.perform(put("/films/2/like/1"));
 
-        //В выводе должны получить сначала "Фильм3"(2 лайка), затем "Фильм2"(1 лайк)
         mockMvc.perform(get("/films/popular?count=2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].likeByUserId[0]").value("1"))
