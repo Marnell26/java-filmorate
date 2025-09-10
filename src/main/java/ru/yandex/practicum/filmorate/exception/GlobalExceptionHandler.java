@@ -32,4 +32,10 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(exception.getMessage(), HttpStatus.NOT_FOUND.toString());
     }
 
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ErrorResponse handleOtherExceptions(Exception exception) {
+        return new ErrorResponse("Внутренняя ошибка сервера", HttpStatus.INTERNAL_SERVER_ERROR.toString());
+    }
+
 }
