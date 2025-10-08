@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public ErrorResponse handleOtherExceptions(Exception exception) {
-        return new ErrorResponse("Внутренняя ошибка сервера", HttpStatus.INTERNAL_SERVER_ERROR.toString());
+        //  return new ErrorResponse("Внутренняя ошибка сервера", HttpStatus.INTERNAL_SERVER_ERROR.toString());
+        return new ErrorResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.toString());
     }
 
 }

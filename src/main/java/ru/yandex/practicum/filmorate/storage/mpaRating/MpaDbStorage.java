@@ -6,33 +6,33 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.mapper.MpaRatingRowMapper;
-import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.mapper.MpaRowMapper;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.List;
 
 @Repository
 @Slf4j
-public class MpaRatingDbStorage implements MpaRatingStorage {
+public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
-    private final MpaRatingRowMapper mpaMapper;
+    private final MpaRowMapper mpaMapper;
 
     @Autowired
-    public MpaRatingDbStorage(JdbcTemplate jdbcTemplate, MpaRatingRowMapper mpaMapper) {
+    public MpaDbStorage(JdbcTemplate jdbcTemplate, MpaRowMapper mpaMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.mpaMapper = mpaMapper;
     }
 
     @Override
-    public List<MpaRating> getMpaRatings() {
-        String sql = "SELECT * FROM ratings ORDER BY id";
+    public List<Mpa> getAllMpa() {
+        String sql = "SELECT * FROM mpa_ratings ORDER BY id";
         return jdbcTemplate.query(sql, mpaMapper);
     }
 
     @Override
-    public MpaRating getMpaRating(int id) {
-        String sql = "SELECT * FROM mpa_rating WHERE id = ?";
+    public Mpa getMpa(int id) {
+        String sql = "SELECT * FROM mpa_ratings WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, mpaMapper, id);
         } catch (EmptyResultDataAccessException e) {

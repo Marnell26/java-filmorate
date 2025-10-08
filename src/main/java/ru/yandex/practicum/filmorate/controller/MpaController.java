@@ -5,29 +5,29 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.service.MpaRatingService;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/mpa")
-public class MpaRatingController {
-    private final MpaRatingService mpaRatingService;
+public class MpaController {
+    private final MpaService mpaRatingService;
 
     @Autowired
-    public MpaRatingController(MpaRatingService mpaRatingService) {
+    public MpaController(MpaService mpaRatingService) {
         this.mpaRatingService = mpaRatingService;
     }
 
     @GetMapping
-    public List<MpaRating> getMpaRatings() {
-        return mpaRatingService.getMpaRatings();
+    public List<Mpa> getAllMpaRatings() {
+        return mpaRatingService.getAllMpa();
     }
 
     @GetMapping("/{id}")
-    public MpaRating getMpaRating(@PathVariable int id) {
-        return mpaRatingService.getMpaRating(id);
+    public Mpa getMpaRating(@PathVariable int id) {
+        return mpaRatingService.getMpa(id);
     }
 
 }

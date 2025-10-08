@@ -1,4 +1,4 @@
-INSERT INTO genre (name) VALUES
+INSERT INTO genres (name) VALUES
     ('Комедия'),
     ('Драма'),
     ('Мультфильм'),
@@ -6,7 +6,7 @@ INSERT INTO genre (name) VALUES
     ('Документальный'),
     ('Боевик');
 
-INSERT INTO rating (name) VALUES
+INSERT INTO mpa_ratings (name) VALUES
     ('G'),
     ('PG'),
     ('PG-13'),

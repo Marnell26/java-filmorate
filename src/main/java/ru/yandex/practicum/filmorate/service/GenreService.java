@@ -2,13 +2,13 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
 import java.util.List;
 
-@Service
+@Component
 @Slf4j
 public class GenreService {
     public final GenreStorage genreStorage;
@@ -18,8 +18,8 @@ public class GenreService {
         this.genreStorage = genreStorage;
     }
 
-    public List<Genre> getGenres() {
-        return genreStorage.getGenres();
+    public List<Genre> getAllGenres() {
+        return genreStorage.getAllGenres();
     }
 
     public Genre getGenre(int id) {

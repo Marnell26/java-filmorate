@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MpaRating {
+public class Mpa {
     private int id;
     private String name;
 }

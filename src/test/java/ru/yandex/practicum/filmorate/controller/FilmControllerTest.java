@@ -5,10 +5,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
 import java.util.Random;
@@ -21,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 public class FilmControllerTest extends ControllersTest {
 
     @ParameterizedTest
@@ -102,7 +105,7 @@ public class FilmControllerTest extends ControllersTest {
     public void getPopularFilmsTest() throws Exception {
         film2.setName("Фильм2");
         user2.setLogin("user2");
-        Film film3 = new Film(0, "Фильм3", "Описание фильма", LocalDate.of(2011, 1, 10), 120);
+        Film film3 = new Film(0, "Фильм3", "Описание фильма", LocalDate.of(2011, 1, 10), 120, new Mpa(1, "R"), genres);
 
         mockMvc.perform(post("/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -127,9 +130,8 @@ public class FilmControllerTest extends ControllersTest {
 
         mockMvc.perform(get("/films/popular?count=2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].likeByUserId[0]").value("1"))
-                .andExpect(jsonPath("$[0].likeByUserId[1]").value("2"))
-                .andExpect(jsonPath("$[1].likeByUserId[0]").value("1"));
+                .andExpect(jsonPath("$[0].id").value("1"))
+                .andExpect(jsonPath("$[1].id").value("2"));
     }
 
 }

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserRowMapper;
 import ru.yandex.practicum.filmorate.model.User;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Repository
+@Component
 @Slf4j
 public class UserDbStorage implements UserStorage {
 
@@ -32,7 +32,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        String sql = "INSERT INTO user (email, login, name, birthday) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection
@@ -50,8 +50,9 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-        String sql = "UPDATE user SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+        String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
         try {
+            getUser(user.getId());
             jdbcTemplate.update(sql,
                     user.getEmail(),
                     user.getLogin(),
@@ -69,13 +70,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getUsers() {
-        String sql = "SELECT * FROM user";
+        String sql = "SELECT * FROM users";
         return new ArrayList<>(jdbcTemplate.query(sql, userMapper));
     }
 
     @Override
     public User getUser(int id) {
-        String sql = "SELECT * FROM user WHERE id = ?";
+        String sql = "SELECT * FROM users WHERE id = ?";
         try {
             return jdbcTemplate.queryForObject(sql, userMapper, id);
         } catch (EmptyResultDataAccessException exception) {
@@ -87,7 +88,7 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(int userId, int friendId) {
-        String sql = "INSERT INTO friend (user_id, friend_id) VALUES (?, ?)";
+        String sql = "INSERT INTO friendships (user_id, friend_id) VALUES (?, ?)";
         List<Integer> friendsIds = getFriends(userId).stream().map(User::getId).toList();
         if (!friendsIds.contains(friendId)) {
             jdbcTemplate.update(sql, getUser(userId).getId(), getUser(friendId).getId());
@@ -97,17 +98,18 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteFriend(int userId, int friendId) {
-        String sql = "DELETE FROM friend WHERE user_id = ? AND friend_id = ?";
-        List<Integer> friendsIds = getFriends(userId).stream().map(User::getId).toList();
-        if (!friendsIds.contains(friendId)) {
-            jdbcTemplate.update(sql, getUser(userId).getId(), getUser(friendId).getId());
+        String sql = "DELETE FROM friendships WHERE user_id = ? AND friend_id = ?";
+        List<Integer> friendsIds = getFriends(getUser(userId).getId()).stream().map(User::getId).toList();
+        if (friendsIds.contains(getUser(friendId).getId())) {
+            jdbcTemplate.update(sql, userId, friendId);
             log.info("Пользователь {} удалил пользователя {} из друзей", userId, friendId);
         }
+
     }
 
     @Override
     public List<User> getFriends(int id) {
-        String sql = "SELECT * FROM user AS u LEFT JOIN friend AS f ON u.id = f.friend_id WHERE f.user_id = ?";
+        String sql = "SELECT * FROM users AS u LEFT JOIN friendships AS f ON u.id = f.friend_id WHERE f.user_id = ?";
         return new ArrayList<>(jdbcTemplate.query(sql, userMapper, getUser(id).getId()));
     }
 

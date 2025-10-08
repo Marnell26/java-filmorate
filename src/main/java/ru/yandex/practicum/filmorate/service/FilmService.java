@@ -4,11 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -16,18 +15,25 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final MpaService mpaService;
+    private final GenreService genreService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserService userService) {
+    public FilmService(FilmStorage filmStorage, UserService userService, MpaService mpaService,
+            GenreService genreService) {
         this.filmStorage = filmStorage;
         this.userService = userService;
+        this.mpaService = mpaService;
+        this.genreService = genreService;
     }
 
     public Film createFilm(Film film) {
+        validateMpaAndGenre(film);
         return filmStorage.createFilm(film);
     }
 
     public Film updateFilm(Film film) {
+        validateMpaAndGenre(film);
         return filmStorage.updateFilm(film);
     }
 
@@ -48,11 +54,14 @@ public class FilmService {
     }
 
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getFilms()
-                .stream()
-                .sorted(Comparator.comparingInt((Film film) -> film.getLikeByUserId().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
+    }
+
+    private void validateMpaAndGenre(Film film) {
+        mpaService.getMpa(film.getMpa().getId());
+        for (Genre genre : film.getGenres()) {
+            genreService.getGenre(genre.getId());
+        }
     }
 
 }

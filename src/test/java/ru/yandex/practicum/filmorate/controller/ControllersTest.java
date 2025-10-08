@@ -7,26 +7,33 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 public class ControllersTest {
 
     protected Film film;
     protected Film film2;
     protected User user;
     protected User user2;
+    protected Set<Genre> genres;
 
     @Autowired
     protected MockMvc mockMvc;
@@ -36,8 +43,10 @@ public class ControllersTest {
 
     @BeforeEach
     public void beforeEach() {
-        film = new Film(0, "Фильм", "Описание фильма", LocalDate.of(2011, 1, 10), 120);
-        film2 = new Film(0, "Фильм", "Описание фильма", LocalDate.of(2011, 1, 10), 120);
+        genres = new HashSet<>();
+        genres.add(new Genre(1, "Боевик"));
+        film = new Film(0, "Фильм", "Описание фильма", LocalDate.of(2011, 1, 10), 120, new Mpa(1, "PG-13"), genres);
+        film2 = new Film(0, "Фильм", "Описание фильма", LocalDate.of(2011, 1, 10), 120, new Mpa(1, "PG-13"), genres);
         user = new User(0, "user@mail.ru", "user", "Ivan", LocalDate.of(1990, 12, 12));
         user2 = new User(0, "user@mail.ru", "user", "Ivan", LocalDate.of(1990, 12, 12));
     }
@@ -123,12 +132,12 @@ public class ControllersTest {
             case "/users" -> {
                 user2.setId(9999);
                 updatedObject = objectMapper.writeValueAsBytes(user2);
-                errorText = "Пользователь не найден";
+                errorText = "Пользователь с id=9999 не найден";
             }
             case "/films" -> {
                 film2.setId(9999);
                 updatedObject = objectMapper.writeValueAsBytes(film2);
-                errorText = "Фильм не найден";
+                errorText = "Фильм с id=9999 не найден";
             }
             default -> throw new IllegalStateException("Unexpected value: " + path);
         }
