@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS "film" (
 	"name" VARCHAR(200) NOT NULL,
 	"description" VARCHAR(255) NOT NULL,
 	"releaseDate" DATE NOT NULL,
-	"duration" BIGINT,
+	"duration" BIGINT NOT NULL,
 	"mpa_id" INTEGER NOT NULL REFERENCES mpa_rating (id) ON DELETE RESTRICT,
 );
 

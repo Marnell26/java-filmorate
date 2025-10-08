@@ -1,14 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.mpaRating;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.MpaRatingRowMapper;
 import ru.yandex.practicum.filmorate.model.MpaRating;
 
 import java.util.List;
 
 @Repository
+@Slf4j
 public class MpaRatingDbStorage implements MpaRatingStorage {
 
     private final JdbcTemplate jdbcTemplate;
@@ -29,8 +33,14 @@ public class MpaRatingDbStorage implements MpaRatingStorage {
     @Override
     public MpaRating getMpaRating(int id) {
         String sql = "SELECT * FROM mpa_rating WHERE id = ?";
-        List<MpaRating> ratings = jdbcTemplate.query(sql, mpaMapper, id);
-        return ratings.stream().findFirst().get();
+        try {
+            return jdbcTemplate.queryForObject(sql, mpaMapper, id);
+        } catch (EmptyResultDataAccessException e) {
+            String message = "Рейтинг с id=" + id + " не найден";
+            log.error(message);
+            throw new NotFoundException(message);
+        }
+
     }
 
 }

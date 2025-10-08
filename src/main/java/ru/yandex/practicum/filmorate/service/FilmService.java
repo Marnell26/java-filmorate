@@ -39,14 +39,12 @@ public class FilmService {
         return filmStorage.getFilm(id);
     }
 
-    public void addLike(int id, int userId) {
-        getFilm(id).setLike(userService.getUser(userId).getId());
-        log.info("Лайк к фильму {} добавлен пользователем {}", getFilm(id).getName(), userId);
+    public void addLike(int filmId, int userId) {
+        filmStorage.addLike(filmStorage.getFilm(filmId).getId(), userService.getUser(userId).getId());
     }
 
-    public void removeLike(int id, int userId) {
-        getFilm(id).removeLike(userService.getUser(userId).getId());
-        log.info("Лайк к фильму {} удален пользователем {}", getFilm(id).getName(), userId);
+    public void removeLike(int filmId, int userId) {
+        filmStorage.removeLike(filmStorage.getFilm(filmId).getId(), userService.getUser(userId).getId());
     }
 
     public List<Film> getPopularFilms(int count) {

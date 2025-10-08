@@ -34,14 +34,4 @@ public class Film {
 
     private final Set<Genre> genres = new HashSet<>();
 
-    private final Set<Integer> likeByUserId = new HashSet<>();
-
-    public void setLike(int id) {
-        likeByUserId.add(id);
-    }
-
-    public void removeLike(int id) {
-        likeByUserId.remove(id);
-    }
-
 }

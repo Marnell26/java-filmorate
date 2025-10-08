@@ -8,8 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -29,8 +27,6 @@ public class User {
     @PastOrPresent(message = "Некорректная дата рождения")
     private LocalDate birthday;
 
-    private final Set<Integer> friendsIds = new HashSet<>();
-
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
         this.email = email;
@@ -42,11 +38,4 @@ public class User {
         this.birthday = birthday;
     }
 
-    public void setFriendId(int id) {
-        friendsIds.add(id);
-    }
-
-    public void removeFriendId(int id) {
-        friendsIds.remove(id);
-    }
 }
