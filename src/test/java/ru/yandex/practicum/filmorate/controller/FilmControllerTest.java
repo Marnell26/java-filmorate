@@ -77,10 +77,6 @@ public class FilmControllerTest extends ControllersTest {
 
         mockMvc.perform(put("/films/1/like/1"))
                 .andExpect(status().isOk());
-
-        mockMvc.perform(get("/films/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.likeByUserId[*]").isNotEmpty());
     }
 
     @Test

@@ -3,4 +3,4 @@ Template repository for Filmorate project.
 
 ## Схема БД
 
-![diagram](src/main/resources/Images/db_scheme.png)
+![diagram](docs/db_scheme.png)

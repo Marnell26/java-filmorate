@@ -51,7 +51,7 @@ public class FilmDbStorage implements FilmStorage {
             return ps;
         }, keyHolder);
         film.setId(Objects.requireNonNull(keyHolder.getKey()).intValue());
-        setGenres(film.getGenres(), film.getId());
+        setFilmGenres(film.getGenres(), film.getId());
         log.info("Фильм с id={} добавлен", film.getId());
 
         return film;
@@ -70,7 +70,7 @@ public class FilmDbStorage implements FilmStorage {
                     film.getDuration(),
                     film.getMpa().getId(),
                     film.getId());
-            setGenres(film.getGenres(), film.getId());
+            setFilmGenres(film.getGenres(), film.getId());
         } catch (EmptyResultDataAccessException exception) {
             String message = "Фильм с id=" + film.getId() + " не найден";
             log.error(message);
@@ -102,7 +102,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(int filmId, int userId) {
-        String sql = "INSERT INTO likes (user_id, film_id) VALUES (?, ?)";
+        String sql = "MERGE INTO likes (user_id, film_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, filmId);
         log.info("Лайк к фильму {} добавлен пользователем {}", filmId, userId);
     }
@@ -126,16 +126,13 @@ public class FilmDbStorage implements FilmStorage {
         return new ArrayList<>(jdbcTemplate.query(sql, filmMapper, count));
     }
 
-    private void setGenres(Set<Genre> genres, int filmId) {
-        String findGenresSql = "SELECT id FROM genres";
+    private void setFilmGenres(Set<Genre> genres, int filmId) {
+        String deleteSql = "DELETE FROM film_genre WHERE film_id = ?";
+        jdbcTemplate.update(deleteSql, filmId);
         String insertFilmGenreSql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
 
-        List<Integer> genresId = jdbcTemplate.queryForList(findGenresSql, Integer.class);
-
         for (Genre genre : genres) {
-            if (genresId.contains(genre.getId())) {
                 jdbcTemplate.update(insertFilmGenreSql, filmId, genre.getId());
-            }
         }
     }
 
