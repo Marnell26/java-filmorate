@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
@@ -61,28 +60,32 @@ public class FilmDbStorage implements FilmStorage {
     public Film updateFilm(Film film) {
         String sql = "UPDATE films SET name = ?, description = ?, release_date = ?, duration = ?, mpa_id = ? WHERE id" +
                 " = ?";
-        try {
-            getFilm(film.getId());
-            jdbcTemplate.update(sql,
-                    film.getName(),
-                    film.getDescription(),
-                    film.getReleaseDate(),
-                    film.getDuration(),
-                    film.getMpa().getId(),
-                    film.getId());
-            setFilmGenres(film.getGenres(), film.getId());
-        } catch (EmptyResultDataAccessException exception) {
+        String checkSql = "SELECT COUNT(*) FROM films WHERE id = ?";
+        if (jdbcTemplate.queryForObject(checkSql, Integer.class, film.getId()) == 0) {
             String message = "Фильм с id=" + film.getId() + " не найден";
             log.error(message);
             throw new NotFoundException(message);
         }
-
+        jdbcTemplate.update(sql,
+                film.getName(),
+                film.getDescription(),
+                film.getReleaseDate(),
+                film.getDuration(),
+                film.getMpa().getId(),
+                film.getId());
+        setFilmGenres(film.getGenres(), film.getId());
+        log.info("Информация о фильме с id={} обновлена", film.getId());
         return film;
     }
 
     @Override
     public List<Film> getFilms() {
         String sql = "SELECT f.*, m.name as mpa FROM films f LEFT JOIN mpa_ratings m ON f.mpa_id = m.id";
+        String genresSql = "SELECT fg.film_id, g.* " +
+                "FROM film_genre fg " +
+                "LEFT OUTER JOIN genres g ON fg.genre_id = g.id " +
+                "ORDER BY fg.film_id";
+
         return new ArrayList<>(jdbcTemplate.query(sql, filmMapper));
     }
 
@@ -90,14 +93,13 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(int id) {
         String sql = "SELECT f.*, m.name as mpa FROM films f LEFT JOIN mpa_ratings m ON f.mpa_id = m.id WHERE f.id = ?";
         Film film = jdbcTemplate.queryForObject(sql, filmMapper, id);
-        film.setGenres(getFilmGenres(id));
-        try {
-            return film;
-        } catch (EmptyResultDataAccessException exception) {
+        if (film == null) {
             String message = "Фильм с id=" + id + " не найден";
             log.error(message);
             throw new NotFoundException(message);
         }
+        film.setGenres(getFilmGenres(id));
+        return film;
     }
 
     @Override
@@ -129,11 +131,12 @@ public class FilmDbStorage implements FilmStorage {
     private void setFilmGenres(Set<Genre> genres, int filmId) {
         String deleteSql = "DELETE FROM film_genre WHERE film_id = ?";
         jdbcTemplate.update(deleteSql, filmId);
-        String insertFilmGenreSql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
 
-        for (Genre genre : genres) {
-                jdbcTemplate.update(insertFilmGenreSql, filmId, genre.getId());
-        }
+        String insertFilmGenreSql = "INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)";
+        List<Object[]> batchArgs = genres.stream()
+                .map(genre -> new Object[]{filmId, genre.getId()})
+                .toList();
+        jdbcTemplate.batchUpdate(insertFilmGenreSql, batchArgs);
     }
 
     private Set<Genre> getFilmGenres(int id) {

@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.mpaRating;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -33,14 +32,13 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public Mpa getMpa(int id) {
         String sql = "SELECT * FROM mpa_ratings WHERE id = ?";
-        try {
-            return jdbcTemplate.queryForObject(sql, mpaMapper, id);
-        } catch (EmptyResultDataAccessException e) {
+        Mpa mpa = jdbcTemplate.queryForObject(sql, mpaMapper, id);
+        if (mpa == null) {
             String message = "Рейтинг с id=" + id + " не найден";
             log.error(message);
             throw new NotFoundException(message);
         }
-
+        return mpa;
     }
 
 }

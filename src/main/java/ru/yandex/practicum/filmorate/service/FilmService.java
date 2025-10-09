@@ -3,11 +3,14 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -59,8 +62,11 @@ public class FilmService {
 
     private void validateMpaAndGenre(Film film) {
         mpaService.getMpa(film.getMpa().getId());
-        for (Genre genre : film.getGenres()) {
-            genreService.getGenre(genre.getId());
+        Set<Integer> allGenresIds = genreService.getAllGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        Set<Integer> filmGenresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        if (!allGenresIds.containsAll(filmGenresIds)) {
+            filmGenresIds.removeAll(allGenresIds);
+            throw new NotFoundException("В базе нет жанров с id: " + filmGenresIds);
         }
     }
 

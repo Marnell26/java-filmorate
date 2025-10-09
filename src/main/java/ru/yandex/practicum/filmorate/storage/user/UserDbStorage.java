@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Component;
@@ -51,20 +50,19 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
-        try {
-            getUser(user.getId());
-            jdbcTemplate.update(sql,
-                    user.getEmail(),
-                    user.getLogin(),
-                    user.getName(),
-                    Date.valueOf(user.getBirthday()),
-                    user.getId());
-            log.info("Информация о пользователе {} обновлена", user.getId());
-        } catch (EmptyResultDataAccessException exception) {
+        String checkSql = "SELECT COUNT(*) FROM users WHERE id = ?";
+        if (jdbcTemplate.queryForObject(checkSql, Integer.class, user.getId()) == 0) {
             String message = "Пользователь с id=" + user.getId() + " не найден";
             log.error(message);
             throw new NotFoundException(message);
         }
+        jdbcTemplate.update(sql,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                Date.valueOf(user.getBirthday()),
+                user.getId());
+        log.info("Информация о пользователе {} обновлена", user.getId());
         return user;
     }
 
@@ -77,13 +75,13 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getUser(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        try {
-            return jdbcTemplate.queryForObject(sql, userMapper, id);
-        } catch (EmptyResultDataAccessException exception) {
+        User user = jdbcTemplate.queryForObject(sql, userMapper, id);
+        if (user == null) {
             String message = "Пользователь с id=" + id + " не найден";
             log.error(message);
             throw new NotFoundException(message);
         }
+        return user;
     }
 
     @Override
