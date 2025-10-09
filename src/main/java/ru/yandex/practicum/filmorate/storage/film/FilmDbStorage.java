@@ -89,9 +89,9 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilm(int id) {
         String sql = "SELECT f.*, m.name as mpa FROM films f LEFT JOIN mpa_ratings m ON f.mpa_id = m.id WHERE f.id = ?";
+        Film film = jdbcTemplate.queryForObject(sql, filmMapper, id);
+        film.setGenres(getFilmGenres(id));
         try {
-            Film film = jdbcTemplate.queryForObject(sql, filmMapper, id);
-            film.setGenres(getFilmGenres(id));
             return film;
         } catch (EmptyResultDataAccessException exception) {
             String message = "Фильм с id=" + id + " не найден";

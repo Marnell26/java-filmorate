@@ -7,10 +7,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -52,12 +48,7 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int id, int friendId) {
-        return Stream.concat(getFriends(getUser(id).getId()).stream(), getFriends(getUser(friendId).getId()).stream())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                .entrySet().stream()
-                .filter(entry -> entry.getValue() > 1)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
+        return userStorage.getCommonFriends(id, friendId);
     }
 
 }

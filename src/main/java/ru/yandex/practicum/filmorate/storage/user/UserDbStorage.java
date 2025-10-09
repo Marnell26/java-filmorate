@@ -113,4 +113,14 @@ public class UserDbStorage implements UserStorage {
         return new ArrayList<>(jdbcTemplate.query(sql, userMapper, getUser(id).getId()));
     }
 
+    @Override
+    public List<User> getCommonFriends(int id, int friendId) {
+        String sql = "SELECT * " +
+                "FROM users u " +
+                "LEFT JOIN friendships f1 ON u.id = f1.friend_id " +
+                "LEFT JOIN friendships f2 ON f1.friend_id = f2.friend_id " +
+                "WHERE f1.user_id = ? AND f2.user_id = ?";
+        return new ArrayList<>(jdbcTemplate.query(sql, userMapper, getUser(id).getId(), getUser(friendId).getId()));
+    }
+
 }
