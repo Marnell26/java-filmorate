@@ -3,11 +3,13 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,18 +18,26 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final MpaService mpaService;
+    private final GenreService genreService;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserService userService) {
+    public FilmService(FilmStorage filmStorage, UserService userService, MpaService mpaService,
+            GenreService genreService) {
         this.filmStorage = filmStorage;
         this.userService = userService;
+        this.mpaService = mpaService;
+        this.genreService = genreService;
     }
 
     public Film createFilm(Film film) {
+        validateMpaAndGenre(film);
         return filmStorage.createFilm(film);
     }
 
     public Film updateFilm(Film film) {
+        getFilm(film.getId());
+        validateMpaAndGenre(film);
         return filmStorage.updateFilm(film);
     }
 
@@ -39,22 +49,26 @@ public class FilmService {
         return filmStorage.getFilm(id);
     }
 
-    public void addLike(int id, int userId) {
-        getFilm(id).setLike(userService.getUser(userId).getId());
-        log.info("Лайк к фильму {} добавлен пользователем {}", getFilm(id).getName(), userId);
+    public void addLike(int filmId, int userId) {
+        filmStorage.addLike(getFilm(filmId).getId(), userService.getUser(userId).getId());
     }
 
-    public void removeLike(int id, int userId) {
-        getFilm(id).removeLike(userService.getUser(userId).getId());
-        log.info("Лайк к фильму {} удален пользователем {}", getFilm(id).getName(), userId);
+    public void removeLike(int filmId, int userId) {
+        filmStorage.removeLike(getFilm(filmId).getId(), userService.getUser(userId).getId());
     }
 
     public List<Film> getPopularFilms(int count) {
-        return filmStorage.getFilms()
-                .stream()
-                .sorted(Comparator.comparingInt((Film film) -> film.getLikeByUserId().size()).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
+    }
+
+    private void validateMpaAndGenre(Film film) {
+        mpaService.getMpa(film.getMpa().getId());
+        Set<Integer> allGenresIds = genreService.getAllGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        Set<Integer> filmGenresIds = film.getGenres().stream().map(Genre::getId).collect(Collectors.toSet());
+        if (!allGenresIds.containsAll(filmGenresIds)) {
+            filmGenresIds.removeAll(allGenresIds);
+            throw new NotFoundException("В базе нет жанров с id: " + filmGenresIds);
+        }
     }
 
 }

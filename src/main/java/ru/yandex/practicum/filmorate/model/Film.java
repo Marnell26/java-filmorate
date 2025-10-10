@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.validation.OldReleaseDate;
 
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class Film {
     private int id;
 
@@ -28,14 +30,8 @@ public class Film {
     @Positive(message = "Продолжительность должна быть положительной")
     private int duration;
 
-    private final Set<Integer> likeByUserId = new HashSet<>();
+    private Mpa mpa;
 
-    public void setLike(int id) {
-        likeByUserId.add(id);
-    }
-
-    public void removeLike(int id) {
-        likeByUserId.remove(id);
-    }
+    private Set<Genre> genres = new HashSet<>();
 
 }

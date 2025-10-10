@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -19,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
 class UserControllerTest extends ControllersTest {
 
     @ParameterizedTest
@@ -67,9 +69,9 @@ class UserControllerTest extends ControllersTest {
     public void addFriendsTest() throws Exception {
         addFriends();
 
-        mockMvc.perform(get("/users/1"))
+        mockMvc.perform(get("/users/1/friends"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.friendsIds[*]").isNotEmpty());
+                .andExpect(jsonPath("$[0].id").isNotEmpty());
     }
 
     @Test
@@ -89,7 +91,7 @@ class UserControllerTest extends ControllersTest {
 
         mockMvc.perform(get("/users/1/friends"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].friendsIds[0]").isNotEmpty());
+                .andExpect(jsonPath("$[0].id").isNotEmpty());
     }
 
     @Test
@@ -103,11 +105,10 @@ class UserControllerTest extends ControllersTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(user3)));
 
-        mockMvc.perform(put("/users/3/friends/1"))
+        mockMvc.perform(put("/users/1/friends/3"))
                 .andExpect(status().isOk());
-        mockMvc.perform(put("/users/3/friends/2"))
+        mockMvc.perform(put("/users/2/friends/3"))
                 .andExpect(status().isOk());
-
 
         mockMvc.perform(get("/users/1/friends/common/2"))
                 .andExpect(status().isOk())
