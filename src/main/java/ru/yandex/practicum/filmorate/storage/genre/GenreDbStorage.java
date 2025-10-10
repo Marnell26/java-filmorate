@@ -32,13 +32,8 @@ public class GenreDbStorage implements GenreStorage {
     @Override
     public Genre getGenre(int id) {
         String sql = "SELECT * FROM genres WHERE id = ?";
-        Genre genre = jdbcTemplate.queryForObject(sql, genreMapper, id);
-        if (genre == null) {
-            String message = "Жанр с id=" + id + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        return genre;
+        return jdbcTemplate.query(sql, genreMapper, id).stream().findFirst().orElseThrow(() ->
+                new NotFoundException("Жанр с id=" + id + " не найден"));
     }
 
 }

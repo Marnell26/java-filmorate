@@ -50,12 +50,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         String sql = "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
-        String checkSql = "SELECT COUNT(*) FROM users WHERE id = ?";
-        if (jdbcTemplate.queryForObject(checkSql, Integer.class, user.getId()) == 0) {
-            String message = "Пользователь с id=" + user.getId() + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
         jdbcTemplate.update(sql,
                 user.getEmail(),
                 user.getLogin(),
@@ -75,13 +69,8 @@ public class UserDbStorage implements UserStorage {
     @Override
     public User getUser(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        User user = jdbcTemplate.queryForObject(sql, userMapper, id);
-        if (user == null) {
-            String message = "Пользователь с id=" + id + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        return user;
+        return jdbcTemplate.query(sql, userMapper, id).stream().findFirst().orElseThrow(() ->
+                new NotFoundException("Пользователь с id=" + id + " не найден"));
     }
 
     @Override

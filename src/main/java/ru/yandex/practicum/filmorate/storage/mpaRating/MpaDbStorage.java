@@ -32,13 +32,8 @@ public class MpaDbStorage implements MpaStorage {
     @Override
     public Mpa getMpa(int id) {
         String sql = "SELECT * FROM mpa_ratings WHERE id = ?";
-        Mpa mpa = jdbcTemplate.queryForObject(sql, mpaMapper, id);
-        if (mpa == null) {
-            String message = "Рейтинг с id=" + id + " не найден";
-            log.error(message);
-            throw new NotFoundException(message);
-        }
-        return mpa;
+        return jdbcTemplate.query(sql, mpaMapper, id).stream().findFirst().orElseThrow(() ->
+                new NotFoundException("Рейтинг с id=" + id + " не найден"));
     }
 
 }

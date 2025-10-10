@@ -36,6 +36,7 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
+        getFilm(film.getId());
         validateMpaAndGenre(film);
         return filmStorage.updateFilm(film);
     }
@@ -49,11 +50,11 @@ public class FilmService {
     }
 
     public void addLike(int filmId, int userId) {
-        filmStorage.addLike(filmStorage.getFilm(filmId).getId(), userService.getUser(userId).getId());
+        filmStorage.addLike(getFilm(filmId).getId(), userService.getUser(userId).getId());
     }
 
     public void removeLike(int filmId, int userId) {
-        filmStorage.removeLike(filmStorage.getFilm(filmId).getId(), userService.getUser(userId).getId());
+        filmStorage.removeLike(getFilm(filmId).getId(), userService.getUser(userId).getId());
     }
 
     public List<Film> getPopularFilms(int count) {
